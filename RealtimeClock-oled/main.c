@@ -60,22 +60,19 @@ int main(void)
 
 	while(1){
 		uint32_t now ;
+		//adding conditin for if stop button presses or not
 		ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
 			now = seconds ;
 		}
-		
 	        if (now != last_sec) {
        	     last_sec = now;
             char time_str[9];
             format_time( now, time_str );
 
             fb_clear();
-            //fb_draw_string(30, 3, time_str);  /* Centered on page 3 */
-            //fb_draw_string(32, 4, test );
-            fb_draw_string(0, 0,"143" );
-            fb_draw_string(0, 1,"342" );
-            fb_draw_string(0, 2,"342" );
-            //fb_draw_string(1, 2,"2123" );
+            fb_draw_string( 15, 3, time_str );  /* Centered on page 3 */
+            //fb_draw_char(3,6 , '3') ;
+            //fb_draw_string(3, 2,"012345" );
             //fb_draw_string(1, 3,"2123" );
             //fb_draw_string(0, 5,"1123" );
             //fb_draw_string(0, 7,"3" );
