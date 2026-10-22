@@ -1,4 +1,3 @@
-#include <stdint.h>
 #define F_CPU 16000000UL
 
 #include <avr/io.h>
@@ -9,16 +8,26 @@
 
 
 volatile uint32_t seconds = 0 ;
-
+volatile uint32_t milliseconds = 0 ;
 
 ISR(TIMER1_COMPA_vect)
 {
     static uint16_t subsec = 0 ;
+    //static uint16_t submill = 0 ;
 
     subsec++ ;
+    //submill++ ;
+
+    /*if( subsec % 1000 == 0 ){
+       milliseconds++ ;
+    }*/
+
+
     if( subsec >= 1000 ){
         subsec = 0 ;
         seconds++ ;
+    }else{
+        milliseconds++ ;
     }
 }
 
@@ -56,29 +65,39 @@ int main(void)
 	sei() ;
 
 	uint32_t last_sec = 0xFFFFFFFF ;
-    char test[5] = "555" ;
+    uint32_t last_millsec =0xFFFFFFFF ;
+
 
 	while(1){
 		uint32_t now ;
+        uint32_t nowmill ;
 		//adding conditin for if stop button presses or not
-		ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+		ATOMIC_BLOCK( ATOMIC_RESTORESTATE ){
 			now = seconds ;
+            nowmill = milliseconds ;
 		}
-	        if (now != last_sec) {
-       	     last_sec = now;
-            char time_str[9];
-            format_time( now, time_str );
+
+
+	        if ( now != last_sec ) {
+            last_sec = now ;
+            char time_str[9] ;
+            format_time( now, time_str ) ;
 
             fb_clear();
-            fb_draw_string( 15, 3, time_str );  /* Centered on page 3 */
+            fb_draw_string( 20, 3, time_str );  /* Centered on page 3 */
             //fb_draw_char(3,6 , '3') ;
-            //fb_draw_string(3, 2,"012345" );
-            //fb_draw_string(1, 3,"2123" );
-            //fb_draw_string(0, 5,"1123" );
-            //fb_draw_string(0, 7,"3" );
-            //fb_test_draw_char( 15 ,4 ,'0' );
+            //fb_draw_char2x7( 60 , 7 , '4' );
             oled_flush();
         }
+
+        if( nowmill != last_millsec )
+        {
+            last_millsec = nowmill  ;
+            //fb_clear();
+            fb_draw_bar( nowmill ) ;
+            oled_flush() ;
+        }
+
 	}
 
 }

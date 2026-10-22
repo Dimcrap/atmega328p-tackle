@@ -1,6 +1,10 @@
 #include <avr/io.h>
+
+//#include <cstdint>
+//#include <cstdint>
 //#include <climits.h>
-#include <stdint.h>
+//#include <cstdint>
+//#include <stdint.h>
 
 #define OLED_DC PB1 
 #define OLED_RST PB0
@@ -128,7 +132,7 @@ static const uint16_t font_11x16[][12] = {
     {0x0000,0x0002,0x0006,0x0006,0x0006,0x0006,0x0006,0x0006,0x3c7a,0x7efc,0x0000},  // 7
     {0x7efc,0xbd7a,0xc386,0xc386,0xc386,0xc386,0xc386,0xc386,0xbd7a,0x7efc,0x0000},  // 8
     {0x00fc,0x817a,0xc386,0xc386,0xc386,0xc386,0xc386,0xc386,0xbd7a,0x7efc,0x0000},  // 9
-    {0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000}   // :
+    {0x0000,0x0000,0x0000,0x0000,0x0000,0x0F0F,0x0000,0x0000,0x0000,0x0000,0x0000}   // :
 };
 
 
@@ -178,7 +182,6 @@ static void fb_clear(void)
 }
 
 
-
 static void fb_draw_char(uint8_t col, uint8_t page, char c)
 {
     uint8_t idx;
@@ -198,6 +201,25 @@ static void fb_draw_char(uint8_t col, uint8_t page, char c)
     }
 
 }
+
+
+static void fb_draw_char2x7( uint8_t col , uint8_t page , char c )
+{
+    uint8_t idx;
+    if (c >= '0' && c <= '9') idx = c - '0' ;
+    else if (c == ':') idx = 10 ;
+    else return ;
+
+    uint16_t offset = 896+40 ;//page *128 + 90 ;
+
+    for (uint8_t i = 0 ; i < 5 ; i++ ) {
+        if (offset + i < 1024) {
+            framebuf[ offset + i ] = 0Xff ;//font_5x7[idx][i] ;
+        }
+    }
+
+}
+
 
 /*
 static void fb_test_draw_char(uint16_t col, uint16_t page, char c)
@@ -220,7 +242,7 @@ static void fb_test_draw_char(uint16_t col, uint16_t page, char c)
 
 
 
-static void fb_draw_string(uint8_t col, uint8_t page, const char *s)
+static void fb_draw_string( uint8_t col, uint8_t page, const char *s )
 {
     while (*s) {
         fb_draw_char( col, page, *s++  );
@@ -228,10 +250,27 @@ static void fb_draw_string(uint8_t col, uint8_t page, const char *s)
     }
 }
 
+static void fb_draw_bar( uint32_t seconduint )
+{
+        uint16_t offset = 896 ;
+        static uint16_t col ;
+
+        for( uint8_t i = 0 ; i < col ; i++ )
+        {
+            if( offset + i < 1024 )
+                framebuf[ offset + i ] = 0xf ;
+        }
+        col++;
+
+        if ( col > 127)
+            col=0 ;
+        //framebuf[ offsetrow2 + i ] = get8bitfont( font_11x16[ idx ][ i ] , 2 ) ;
+}
+
 static void oled_flush(void)
 {
     oled_cmd(0x21); oled_cmd(0); oled_cmd(127) ;  /* Column range */
     oled_cmd(0x22); oled_cmd(0); oled_cmd(7) ;    /* Page range */
     //oled_data( framebuf, 1024 );
-    oled_data( framebuf , 1024 );
+    oled_data( framebuf , 1024 ) ;
 }
