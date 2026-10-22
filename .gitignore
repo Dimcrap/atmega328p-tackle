@@ -4,3 +4,6 @@
 RealtimeClock-oled/*.bin
 RealtimeClock-oled/*.elf
 RealtimeClock-oled/*.hex
+RealtimeClock-oled/decoy.h
+RealtimeClock-oled/m.sh
+*/*.kate-swp
