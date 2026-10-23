@@ -34,7 +34,7 @@ static uint8_t twi_write(uint8_t data)
     return ( TWSR & 0xF8 ) ;
 }
 
-static uint8_t read_ack(void)
+static uint8_t twi_read_ack(void)
 {
         TWCR = ( 1 << TWINT ) | ( 1<<TWEA) | ( 1<< TWEN);
         while( !(TWCR) & ( 1 << TWINT )));
