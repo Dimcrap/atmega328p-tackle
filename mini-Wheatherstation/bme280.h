@@ -29,7 +29,7 @@ static uint8_t bme280_read_reg( uint8_t reg )
 static void bme280_read_burst( uint8_t reg , uint8_t *buff , uint8_t len )
 {
     twi_start();
-    twi_write( (BME280_ADDR << 1 ) | 1 );
+    twi_write( (BME280_ADDR << 1 ) | 0  );
     twi_write( reg ) ;
     twi_start() ;
     twi_write( ( BME280_ADDR << 1) | 1 ) ;
@@ -37,7 +37,7 @@ static void bme280_read_burst( uint8_t reg , uint8_t *buff , uint8_t len )
     {
         buff[i] = twi_read_ack() ;
     }
-    buff[ len -1 ] = twi_read_ack() ;
+    buff[ len -1 ] = twi_read_nack() ;
     twi_stop() ;
 }
 
@@ -60,6 +60,7 @@ static void bme280_read_calibration( void )
         uint8_t buf[ 26 ];
         bme280_read_burst( 0x88  , buf , 26 ) ;
 
+
         cal.dig_T1 = (uint16_t)(buf[1] << 8) | buf[0];
         cal.dig_T2 = (int16_t)(buf[3] << 8) | buf[2];
         cal.dig_T3 = (int16_t)(buf[5] << 8) | buf[4];
@@ -72,11 +73,10 @@ static void bme280_read_calibration( void )
         cal.dig_P7 = (int16_t)(buf[19] << 8) | buf[18];
         cal.dig_P8 = (int16_t)(buf[21] << 8) | buf[20];
         cal.dig_P9 = (int16_t)(buf[23] << 8) | buf[22];
-
-        cal.dig_H1 = bme280_read_reg( 0xA1 );
+        //cal.dig_H1 = bme280_read_reg( 0xA1 );
 
         uint8_t hbuf[ 7 ] ;
-        bme280_read_burst( 0xE1 , hbuf , 7 );
+        //bme280_read_burst( 0xE1 , hbuf , 7 );
         cal.dig_H2 = ( int16_t )( hbuf[1] << 8 ) | hbuf[ 0 ] ;
         cal.dig_H3 = hbuf[ 2 ] ;
         cal.dig_H4 = ( int16_t )( hbuf[ 3 ] << 4 ) | ( hbuf[ 4 ] & 0x0F );
@@ -93,7 +93,7 @@ static void bme280_init( void )
     bme280_read_calibration() ;
 
     /* humididy oversampling x1 ( must be set before ctrl_meas) */
-    //bme280_write_reg( 0xF2 , 0x01 ) ;
+    bme280_write_reg( 0xF2 , 0x01 ) ;
 
     //temprature x1 , pressure x1 , normal mode
     bme280_write_reg( 0xF4 , 0x27 ) ;

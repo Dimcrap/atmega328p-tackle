@@ -7,3 +7,11 @@ RealtimeClock-oled/*.hex
 RealtimeClock-oled/decoy.h
 RealtimeClock-oled/m.sh
 */*.kate-swp
+
+mini-Wheatherstation/*.bin
+mini-Wheatherstation/*.elf
+mini-Wheatherstation/*.hex
+mini-Wheatherstation/decoy.hex
+mini-Wheatherstation/decoy.txt
+mini-Wheatherstation/m.sh
+
