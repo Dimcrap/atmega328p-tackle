@@ -1,4 +1,3 @@
-#pragma once
 
 #define TWI_FREQ 100000UL
 
@@ -38,18 +37,24 @@ static uint8_t twi_write(uint8_t data)
 static uint8_t twi_read_ack(void)
 {
         TWCR = ( 1 << TWINT ) | ( 1<<TWEA) | ( 1<< TWEN);
-        while( !( TWCR & ( 1 << TWINT )) );
+        while( !(TWCR) & ( 1 << TWINT )));
         return TWDR ;
 }
 
 
 static uint8_t twi_read_nack(void)
 {
-        TWCR = ( 1 << TWINT ) | ( 1<< TWEN );
+        TWCR = ( 1 << TWINT ) | ( 1 << TWEA ) | ( 1<< TWEN );
         while( !( TWCR & ( 1<<TWINT )));
         return TWDR ;
 }
 
+static uint8_t twi_read_nack(void)
+{
+    TWCR = ( 1<< TWINT ) | ( 1 << TWEN) ;
+    while( !(TWCR & ( 1 << TWINT )) );
+    return TWDR ;
+}
 
 
 
