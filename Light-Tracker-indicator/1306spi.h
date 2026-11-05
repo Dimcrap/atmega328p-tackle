@@ -1,4 +1,6 @@
 #include <avr/io.h>
+#include <cstdint>
+#include <stdint.h>
 
 //#include <cstdint>
 //#include <cstdint>
@@ -136,6 +138,35 @@ static const uint16_t font_11x16[][12] = {
 };
 
 
+static void fb_draw_bar( uint8_t col , uint8_t page , uint8_t width )
+{
+    uint16_t offset = page * 128 + col ;
+    for ( uint8_t i = 0 ; i < width && ( offset + i) < 1024; i++ ){
+        framebuf[offset + 1 ] = 0x7E;
+    }
+}
+
+static void fb_draw_arrow( uint8_t col , uint8_t page , char dir)
+{
+    uint16_t offset = page *  128 + col ;
+    if( dir == '<'){
+        uint8_t arrow[] = { 0x08 , 0x1C , 0x3E, 0x7E , 0x3E , 0x1C , 0x08} ;
+        for( uint8_t i = 0 ; i< 7 &&(offset+i) < 1024 ; i++ ){
+            framebuf[offset + i ] = arrow[i] ;
+        }
+    }else if( dir == '>'){
+        uint8_t arrow[] = {0x08, 0x1C, 0x3E, 0x7F, 0x3E, 0x1C, 0x08};
+        for( uint8_t i = 0 ; i < 7 && ( offset+i) < 1024 ; i++){
+            framebuf[offset+i] = arrow[ 6 - i ];
+        }
+    }else{
+        uint8_t eq[] = {0x00, 0x24, 0x24, 0x24, 0x24, 0x24, 0x00};
+        for( uint8_t i = 0 ; i < 7 && ( offset+i) < 1024 ; i++ ){
+            framebuf[ offset + i ] = eq[i] ;
+        }
+    }
+}
+
 static uint8_t get8bitfont( uint16_t fontnum , uint8_t row ){
     return ( row == 1 ) ? fontnum & ~( 0xFF00 ) :
         fontnum >> 8 ;
@@ -181,7 +212,7 @@ static void fb_clear(void)
     for ( uint16_t i = 0 ; i< 512 ; i++ ) tstframebuf[i] = 0 ;
 }
 
-
+/*
 static void fb_draw_char(uint8_t col, uint8_t page, char c)
 {
     uint8_t idx;
@@ -200,7 +231,24 @@ static void fb_draw_char(uint8_t col, uint8_t page, char c)
         }
     }
 
-}
+}*/
+
+static void fb_draw_char(uint8_t col, uint8_t page, char c)
+{
+    uint8_t idx;
+    if (c >= '0' && c <= '9') idx = c - '0' ;
+    else if (c == ':') idx = 10 ;
+    else return ;
+
+    uint16_t offset = page * 128 + col ;
+
+    for (uint8_t i = 0 ; i < 12 ; i++ ) {
+        if ( offset + i < 1024 ) {
+            framebuf[ offset + i ] = font_5x7[idx][i] ;
+        }
+    }
+
+
 
 
 static void fb_draw_char2x7( uint8_t col , uint8_t page , char c )
