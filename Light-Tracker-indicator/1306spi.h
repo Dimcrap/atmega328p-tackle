@@ -1,12 +1,7 @@
 #include <avr/io.h>
-#include <cstdint>
 #include <stdint.h>
+#include <util/delay.h>
 
-//#include <cstdint>
-//#include <cstdint>
-//#include <climits.h>
-//#include <cstdint>
-//#include <stdint.h>
 
 #define OLED_DC PB1 
 #define OLED_RST PB0
@@ -18,24 +13,16 @@ static void spi_init(void)
     DDRB |= ( 1 << PB3 ) | ( 1 << PB5 ) | ( 1 << PB2 );
 
     SPCR = ( 1 << SPE ) | ( 1 << MSTR );
-
 }
 
 
 static uint8_t spi_transfer(uint8_t data)
 {
-    SPDR = data;
-    while( !( SPSR & ( 1 << SPIF ) ));
-    return SPDR;
+    SPDR = data ;
+    while( !( SPSR & ( 1 << SPIF ) )) ;
+    return SPDR ;
 }
-/*
-static uint8_t spi_transfer(uint16_t data)
-{
-    SPDR = data;
-    while( !( SPSR & ( 1 << SPIF ) ));
-    return SPDR;
 
-}*/
 
 static void oled_cmd( uint8_t cmd )
 {
@@ -45,26 +32,16 @@ static void oled_cmd( uint8_t cmd )
 	PORTB |= ( 1 << OLED_CS );
 }
 
+
 static void oled_data( const uint8_t * buf , uint16_t len )
 {
-	PORTB |= ( 1 << OLED_DC );
-	PORTB &= ~( 1 << OLED_CS );
+	PORTB |= ( 1 << OLED_DC ) ;
+	PORTB &= ~( 1 << OLED_CS ) ;
 	for( uint16_t i = 0 ; i < len ; i++ ){
 		spi_transfer(buf[i]);	
 	}	
 	PORTB |= ( 1 << OLED_CS );
 }
-
-/*
-static void oled_data( const uint16_t * buf , uint16_t len )
-{
-    PORTB |= ( 1 << OLED_DC );
-    PORTB &= ~( 1 << OLED_CS );
-    for( uint16_t i = 0 ; i < len ; i++ ){
-        spi_transfer(buf[i]);
-    }
-    PORTB |= ( 1 << OLED_CS );
-}*/
 
 
 static void oled_init(void)
@@ -120,44 +97,60 @@ static const uint8_t font_5x7[][5] = {
     {0x36,0x49,0x49,0x49,0x36},  /* 8 */
     {0x06,0x49,0x49,0x29,0x1E},  /* 9 */
     {0x00,0x36,0x36,0x00,0x00},  /* : */
-};
-
-
-static const uint16_t font_11x16[][12] = {
-    {0x7efc,0xbc7a,0xc006,0xc006,0xc006,0xc006,0xc006,0xc006,0xbc7a,0x7efc,0x0000},  // 0
-    {0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x3c78,0x7efc,0x0000},  // 1
-    {0x7e00,0xbd02,0xc386,0xc386,0xc386,0xc386,0xc386,0xc386,0x817a,0x00fc,0x0000},  // 2
-    {0x0000,0x8102,0xc386,0xc386,0xc386,0xc386,0xc386,0xc386,0xbd7a,0x7efc,0x0000},  // 3
-    {0x00fc,0x0178,0x0380,0x0380,0x0380,0x0380,0x0380,0x0380,0x3d78,0x7efc,0x0000},  // 4
-    {0x00fc,0x817a,0xc386,0xc386,0xc386,0xc386,0xc386,0xc386,0xbd02,0x7e00,0x0000},  // 5
-    {0x7efc,0xbd7a,0xc386,0xc386,0xc386,0xc386,0xc386,0xc386,0xbd02,0x7e00,0x0000},  // 6
-    {0x0000,0x0002,0x0006,0x0006,0x0006,0x0006,0x0006,0x0006,0x3c7a,0x7efc,0x0000},  // 7
-    {0x7efc,0xbd7a,0xc386,0xc386,0xc386,0xc386,0xc386,0xc386,0xbd7a,0x7efc,0x0000},  // 8
-    {0x00fc,0x817a,0xc386,0xc386,0xc386,0xc386,0xc386,0xc386,0xbd7a,0x7efc,0x0000},  // 9
-    {0x0000,0x0000,0x0000,0x0000,0x0000,0x0F0F,0x0000,0x0000,0x0000,0x0000,0x0000}   // :
+    {0x7E, 0x11, 0x11, 0x11, 0x7E},// A
+    {0x7F, 0x49, 0x49, 0x49, 0x36},// B
+    {0x3E, 0x41, 0x41, 0x41, 0x22},// C
+    {0x7F, 0x41, 0x41, 0x22, 0x1C},// D
+    {0x7F, 0x49, 0x49, 0x49, 0x41},// E
+    {0x7F, 0x09, 0x09, 0x01, 0x01},// F
+    {0x3E, 0x41, 0x41, 0x51, 0x32},// G
+    {0x7F, 0x08, 0x08, 0x08, 0x7F},// H
+    {0x00, 0x41, 0x7F, 0x41, 0x00},// I
+    {0x20, 0x40, 0x41, 0x3F, 0x01},// J
+    {0x7F, 0x08, 0x14, 0x22, 0x41},// K
+    {0x7F, 0x40, 0x40, 0x40, 0x40},// L
+    {0x7F, 0x02, 0x04, 0x02, 0x7F},// M
+    {0x7F, 0x04, 0x08, 0x10, 0x7F},// N
+    {0x3E, 0x41, 0x41, 0x41, 0x3E},// O
+    {0x7F, 0x09, 0x09, 0x09, 0x06},// P
+    {0x3E, 0x41, 0x51, 0x21, 0x5E},// Q
+    {0x7F, 0x09, 0x19, 0x29, 0x46},// R
+    {0x46, 0x49, 0x49, 0x49, 0x31},// S
+    {0x01, 0x01, 0x7F, 0x01, 0x01},// T
+    {0x3F, 0x40, 0x40, 0x40, 0x3F},// U
+    {0x1F, 0x20, 0x40, 0x20, 0x1F},// V
+    {0x7F, 0x20, 0x18, 0x20, 0x7F},// W
+    {0x63, 0x14, 0x08, 0x14, 0x63},// X
+    {0x03, 0x04, 0x78, 0x04, 0x03},// Y
+    {0x61, 0x51, 0x49, 0x45, 0x43}// Z
 };
 
 
 static void fb_draw_bar( uint8_t col , uint8_t page , uint8_t width )
 {
     uint16_t offset = page * 128 + col ;
-    for ( uint8_t i = 0 ; i < width && ( offset + i) < 1024; i++ ){
-        framebuf[offset + 1 ] = 0x7E;
+    for ( uint8_t i = 0 ; i < width && ( offset + i ) < 1024 ; i++ )
+    {
+        framebuf[ offset + i ] = 0x7E ;
     }
 }
+
 
 static void fb_draw_arrow( uint8_t col , uint8_t page , char dir)
 {
     uint16_t offset = page *  128 + col ;
     if( dir == '<'){
-        uint8_t arrow[] = { 0x08 , 0x1C , 0x3E, 0x7E , 0x3E , 0x1C , 0x08} ;
-        for( uint8_t i = 0 ; i< 7 &&(offset+i) < 1024 ; i++ ){
+        uint8_t arrow[] = {0x00, 0x08, 0x14, 0x22, 0x41} ;// <
+        for( uint8_t i = 0 ; i< 5 &&(offset+i) < 1024 ; i++ ){
             framebuf[offset + i ] = arrow[i] ;
         }
     }else if( dir == '>'){
-        uint8_t arrow[] = {0x08, 0x1C, 0x3E, 0x7F, 0x3E, 0x1C, 0x08};
-        for( uint8_t i = 0 ; i < 7 && ( offset+i) < 1024 ; i++){
-            framebuf[offset+i] = arrow[ 6 - i ];
+        uint8_t arrow[] = { 0x41, 0x22, 0x14, 0x08, 0x00 };// >
+        //uint8_t arrow[] = { 0x08, 0x2A, 0x1C, 0x08 } ;// ->
+
+        for( uint8_t i = 0 ; i < 5 && ( offset+i) < 1024 ; i++){
+            //framebuf[ offset+i ] = arrow[ 6 - i ];
+            framebuf[ offset+i ] = arrow[ i ];
         }
     }else{
         uint8_t eq[] = {0x00, 0x24, 0x24, 0x24, 0x24, 0x24, 0x00};
@@ -167,42 +160,11 @@ static void fb_draw_arrow( uint8_t col , uint8_t page , char dir)
     }
 }
 
-static uint8_t get8bitfont( uint16_t fontnum , uint8_t row ){
+
+static uint8_t get8bitfont( uint16_t fontnum , uint8_t row )
+{
     return ( row == 1 ) ? fontnum & ~( 0xFF00 ) :
         fontnum >> 8 ;
-};
-
-
-static const uint8_t getscale2( uint8_t fontnum , uint8_t row )
-{
-    uint8_t extracted ;
-    uint8_t doubled ;
-
-    if( row == 1 )
-    {
-        int rightfour = fontnum & ~( 0xF << 4 ) ;
-
-        for ( int i = 0,k=0 ; i < 4 ; i++,k++ )
-        {
-            unsigned int mask = 1 << i ;
-            extracted = ( rightfour  & mask ) >> i ;
-            doubled = doubled | ( extracted << k++ ) ;
-            doubled = doubled | ( extracted << k ) ;
-        }
-
-    }else{
-        int leftfour = fontnum >> 4  ;
-
-        for ( int i = 0,k=0 ; i < 4 ; i++,k++ )
-        {
-            unsigned int mask = 1 << i ;
-            extracted = ( leftfour  & mask ) >> i ;
-            doubled = doubled | ( extracted << k++ ) ;
-            doubled = doubled | ( extracted << k ) ;
-        }
-    }
-
-    return doubled ;
 };
 
 
@@ -212,108 +174,33 @@ static void fb_clear(void)
     for ( uint16_t i = 0 ; i< 512 ; i++ ) tstframebuf[i] = 0 ;
 }
 
-/*
-static void fb_draw_char(uint8_t col, uint8_t page, char c)
-{
-    uint8_t idx;
-    if (c >= '0' && c <= '9') idx = c - '0' ;
-    else if (c == ':') idx = 10 ;
-    else return ;
-
-    uint16_t offset = page * 128 + col ;
-    uint16_t offsetrow2 = ( page+1 ) * 128 + col ;
-    for (uint8_t i = 0 ; i < 12 ; i++ ) {
-        if ( offset + i < 1024 ) {
-            framebuf[ offset + i ] = get8bitfont( font_11x16[idx][i] , 1 ) ;
-            framebuf[ offsetrow2 + i ] = get8bitfont( font_11x16[ idx ][ i ] , 2 ) ;
-            //framebuf[ offsetrow2 + i ] = getscale2( font_5x7[ idx ][ i ] , 2 ) ;
-            //framebuf[ offset + i ] = font_5x7[idx][i] ;
-        }
-    }
-
-}*/
 
 static void fb_draw_char(uint8_t col, uint8_t page, char c)
 {
     uint8_t idx;
     if (c >= '0' && c <= '9') idx = c - '0' ;
-    else if (c == ':') idx = 10 ;
+    else if( c > '9' && c < 'Z' ) idx = c - 54 ;
+    else if ( c == ':' ) idx = 10 ;
     else return ;
 
     uint16_t offset = page * 128 + col ;
 
-    for (uint8_t i = 0 ; i < 12 ; i++ ) {
+    for (uint8_t i = 0 ; i < 5 ; i++ ) {
         if ( offset + i < 1024 ) {
             framebuf[ offset + i ] = font_5x7[idx][i] ;
         }
     }
-
-
-
-
-static void fb_draw_char2x7( uint8_t col , uint8_t page , char c )
-{
-    uint8_t idx;
-    if (c >= '0' && c <= '9') idx = c - '0' ;
-    else if (c == ':') idx = 10 ;
-    else return ;
-
-    uint16_t offset = 896+40 ;//page *128 + 90 ;
-
-    for (uint8_t i = 0 ; i < 5 ; i++ ) {
-        if (offset + i < 1024) {
-            framebuf[ offset + i ] = 0Xff ;//font_5x7[idx][i] ;
-        }
-    }
-
 }
-
-
-/*
-static void fb_test_draw_char(uint16_t col, uint16_t page, char c)
-{
-    uint8_t idx = 0 ;
-    //if (c >= '0' && c <= '9') idx = c - '0' ;
-    //else if (c == ':') idx = 10 ;
-    //else return ;
-
-    uint16_t offset = page * 128 + col ;
-    for ( uint8_t i = 0 ; i < 8 ; i++ ) {
-        if ( offset + i < 512 ) {
-            tstframebuf[ offset + i ] = font_ [ idx ][ i ] ;
-            //framebuf[ offset + i + i ] = font_5x7[idx][i] ;
-        }
-    }
-    offset =  page  * 128 + (col+1) ;
-    tstframebuf[offset] = 0xFF ;
-}*/
-
 
 
 static void fb_draw_string( uint8_t col, uint8_t page, const char *s )
 {
     while (*s) {
         fb_draw_char( col, page, *s++  );
-        col += 11 ;  /* set 6 for 5 pixels + 1 space */
+        col += 6 ;  /* set 6 for 5 pixels + 1 space */
     }
 }
 
-static void fb_draw_bar( uint32_t seconduint )
-{
-        uint16_t offset = 896 ;
-        static uint16_t col ;
-
-        for( uint8_t i = 0 ; i < col ; i++ )
-        {
-            if( offset + i < 1024 )
-                framebuf[ offset + i ] = 0xf ;
-        }
-        col++;
-
-        if ( col > 127)
-            col=0 ;
-        //framebuf[ offsetrow2 + i ] = get8bitfont( font_11x16[ idx ][ i ] , 2 ) ;
-}
 
 static void oled_flush(void)
 {
