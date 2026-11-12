@@ -12,7 +12,7 @@ PORT     = /dev/ttyUSB0
 CC       = avr-gcc
 OBJCOPY  = avr-objcopy
 CFLAGS   = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Os  -Wall -Wextra -std=c11 
-TARGET   = morse
+TARGET   = dooralarm
 
 all: $(TARGET).hex $(TARGET).bin
 
