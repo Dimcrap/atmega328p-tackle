@@ -152,6 +152,13 @@ static void fb_draw_arrow( uint8_t col , uint8_t page , char dir)
             //framebuf[ offset+i ] = arrow[ 6 - i ];
             framebuf[ offset+i ] = arrow[ i ];
         }
+    }else if( dir == '^' )
+    {
+        uint8_t arrow[] ={ 0x04, 0x02, 0x01, 0x02, 0x04 } ;// ^
+        for( uint8_t i = 0 ; i < 5 && ( offset+i) < 1024 ; i++){
+        framebuf[ offset+i ] = arrow[ i ] ;
+        };
+
     }else{
         uint8_t eq[] = {0x00, 0x24, 0x24, 0x24, 0x24, 0x24, 0x00};
         for( uint8_t i = 0 ; i < 7 && ( offset+i) < 1024 ; i++ ){
