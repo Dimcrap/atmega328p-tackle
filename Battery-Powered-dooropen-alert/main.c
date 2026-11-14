@@ -13,7 +13,7 @@
 #define BUZZPIN PB1
 #define SWITCH PD2
 
-#define EE_SLEEP_COUNT ((uint16_t *) 0) ;
+#define EE_DOOR_COUNT ((uint16_t *) 0)
 typedef uint8_t byte;
 
 volatile uint8_t wdt_fired = 0 ;
@@ -38,7 +38,7 @@ static void delay_ms( uint16_t ms)
 
 static void led_blink( byte count, uint16_t on_ms , uint16_t off_ms )
 {
-        DDRB |= ( 1 << LED_PIN );
+        DDRB |= ( 1 << LEDPIN );
         for( byte i = 0 ; i < count ; i++ )
         {
             PORTB |= ( 1 << LEDPIN) ;
@@ -51,8 +51,8 @@ static void led_blink( byte count, uint16_t on_ms , uint16_t off_ms )
 
 static void beepBuzz( uint16_t duration )
 {
-    DDRB |= ( 1 << BUZZ ) ;
-    PRR &= ~( 1 << PRTIME1 ); //time1 enable
+    DDRB |= ( 1 << BUZZPIN ) ;
+    PRR &= ~( 1 << PRTIM1 ); //time1 enable
 
     TCCR1A = ( 1 << COM1A0 ); //toggle OC1A
     TCCR1B = ( 1 << WGM12) | ( 1 << CS11 ); //prescaler 8
@@ -64,20 +64,20 @@ static void beepBuzz( uint16_t duration )
     TCCR1B = 0 ;
     PORTB &= ~( 1 << BUZZPIN ) ;
 
-    PRR |= ( 1 << PRTIME1 ) ;
+    PRR |= ( 1 << PRTIM1 ) ;
 }
 
 static void eneter_deep_sleep(void)
 {
     ADCSRA &= ~(1 << ADEN); //ADC
-    ACSR |= ( 1 <<‌ ACD ); //analog comparator
+    ACSR |= ( 1 << ACD ) ;//analog comparator
 
     PRR = (1 << PRTWI) | (1 << PRTIM2) | (1 << PRTIM0)
     | (1 << PRTIM1) | (1 << PRSPI) | (1 << PRUSART0)
     | (1 << PRADC);
 
     DDRB &= ~( (1 << LEDPIN) | ( 1 << BUZZPIN) );
-    PORTB &= ~( (1 << LEDPIN) | ( 1 << BUZZER_PIN));
+    PORTB &= ~( (1 << LEDPIN) | ( 1 << BUZZPIN));
 
     WDTCSR |= ( 1 << WDIE) ;
 
@@ -98,8 +98,8 @@ int main(void)
     MCUSR &= ~( 1 << WDRF );
     wdt_disable();
 
-    DDRD &= ~( 1 << REED_PIN );
-    PORTD |= ( 1 << REED_PIN );
+    DDRD &= ~( 1 << SWITCH );
+    PORTD |= ( 1 << SWITCH );
 
     EICRA = ( 1 << ISC01) | ( 1 << ISC00 ) ;
     EIMSK = ( 1 << INT0 ) ;
@@ -111,7 +111,7 @@ int main(void)
     sei();
 
     uint16_t door_count = eeprom_read_word( EE_DOOR_COUNT ) ;
-    if( door_count = 0xFFFF ) door_count = 0 ;
+    if( door_count == 0xFFFF ) door_count = 0 ;
 
     byte show = door_count % 10 ;
     if( show > 0 ) led_blink( show , 150 , 150 );
@@ -124,7 +124,7 @@ int main(void)
             door_opened = 0 ;
 
             door_count++ ;
-            eeprom_read_word( EE_DOOR_COUNT,door_count ) ;
+            eeprom_update_word( EE_DOOR_COUNT,door_count ) ;
 
             beepBuzz(2000) ;
             led_blink( 3 , 200 , 200 );
@@ -135,11 +135,11 @@ int main(void)
         if( wdt_fired ){
             wdt_fired  = 0 ;
 
-            DDRB |= ( 1 << LED_PIN );
-            PORTB |= ( 1 << LED_PIN );
+            DDRB |= ( 1 << LEDPIN );
+            PORTB |= ( 1 << LEDPIN );
             _delay_ms(20) ;
-            PORTB &= ~( 1 << LED_PIN );
-            DDRB &= ~( 1 << LED_PIN );
+            PORTB &= ~( 1 << LEDPIN );
+            DDRB &= ~( 1 << LEDPIN );
         }
     }
 }
