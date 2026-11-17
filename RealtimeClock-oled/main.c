@@ -65,7 +65,7 @@ int main(void)
 	sei() ;
 
 	uint32_t last_sec = 0xFFFFFFFF ;
-    uint32_t last_millsec =0xFFFFFFFF ;
+    uint32_t last_millsec = 0xFFFFFFFF ;
 
 
 	while(1){
@@ -86,7 +86,7 @@ int main(void)
             fb_clear();
             fb_draw_string( 20, 3, time_str );  /* Centered on page 3 */
             //fb_draw_char(3,6 , '3') ;
-            //fb_draw_char2x7( 60 , 7 , '4' );
+           //fb_draw_char2x7( 60 , 7 , '4' );
             oled_flush();
         }
 
@@ -94,7 +94,7 @@ int main(void)
         {
             last_millsec = nowmill  ;
             //fb_clear();
-            fb_draw_bar( nowmill ) ;
+          //  fb_draw_bar( nowmill ) ;
             oled_flush() ;
         }
 

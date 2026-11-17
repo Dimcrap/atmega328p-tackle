@@ -192,7 +192,7 @@ static void fb_draw_char(uint8_t col, uint8_t page, char c)
     uint16_t offset = page * 128 + col ;
     uint16_t offsetrow2 = ( page+1 ) * 128 + col ;
     for (uint8_t i = 0 ; i < 12 ; i++ ) {
-        if (offset + i < 1024) {
+        if ( offset + i < 1024 ) {
             framebuf[ offset + i ] = get8bitfont( font_11x16[idx][i] , 1 ) ;
             framebuf[ offsetrow2 + i ] = get8bitfont( font_11x16[ idx ][ i ] , 2 ) ;
             //framebuf[ offsetrow2 + i ] = getscale2( font_5x7[ idx ][ i ] , 2 ) ;
