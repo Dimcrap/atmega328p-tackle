@@ -1,14 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
-#include <cstdint>
 
-
-#define COIL1
-#define COIL2
-#define COIL3
-#define COIL4
-
-typedef uint8_t byte  ;
+typedef uint8_t byte ;
 
 #ifndef BYJ48_DDR_IN
 #define BYJ48_DDR_IN    DDRC
@@ -38,6 +31,11 @@ typedef uint8_t byte  ;
 
 #define TURNOFF 0xF0
 #define HALFSTEPCOUNT 8
+
+
+volatile int32_t currentpos = 0 ;
+volatile byte rappiding = 0 ;
+
 
 const uint8_t g_halfstep[] = {
      0b00000001
@@ -77,6 +75,7 @@ void BYJ48_Init (void)
     BYJ48_SetPORT_INs ();
 }
 
+
 void BYJ48_HalfStepClockwise(void){
     byte i = 0 ;
     while( i < HALFSTEPCOUNT ){
@@ -85,12 +84,16 @@ void BYJ48_HalfStepClockwise(void){
     }
 }
 
+
 void BYJ48_HalfStepAntiClockwise(void)
 {
     byte i = HALFSTEPCOUNT ;
-    while ( i > 0) {
-        BYJ48_PORT_IN = ( BYJ48_PORT_IN & 0xF0) | g_halfstep[i++] ;
-        _delay_ms(2) ;
+    // one step = 1/8*64
+    while (i--) {
+        // send to INs
+        BYJ48_PORT_IN = (BYJ48_PORT_IN & 0xF0) | g_halfstep[i];
+
+        _delay_ms (2);
     }
 }
 
@@ -105,14 +108,43 @@ void BYJ48_OneTurnClockwise(void )
 void BYJ48_OneTurnantiClockwise(void)
 {
     uint16_t j ;
-    for( j = 0 ; j < 512 ; j++ )
-    {
-        BYJ48_HalfStepAntiClockwise() ;
+    // one turn
+    for (j=0; j<512; j++) {
+        // one step
+        BYJ48_HalfStepAntiClockwise ();
     }
 }
 
+void BYJ48_Step(uint16_t stepcount , int8_t dir) {
+    stepcount*=10;
+    uint16_t count = 500 ;
+    if( dir > 0 )
+    {
+        while( stepcount-- ){
+            BYJ48_HalfStepClockwise() ;
+        }
+    }else {
+        while( stepcount-- ){
+            BYJ48_HalfStepAntiClockwise() ;
+        }
+    }
+};
+
+
+void BYJ48_Rapid(byte clockwise)
+{
+    rappiding = 1 ;
+    if( clockwise )
+    {   while( rappiding ) BYJ48_OneTurnClockwise() ;
+    }else{
+        while( rappiding ) BYJ48_OneTurnantiClockwise() ;
+    }
+}
+
+
 void BYJ48_TurnOff(void)
 {
+    rappiding = 0 ;
     BYJ48_PORT_IN &= TURNOFF ;
 }
 
