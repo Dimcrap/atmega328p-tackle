@@ -18,7 +18,7 @@
   #define LIMIT_PIN   PD2 // INT0*/`
 
 
-  #define EE_STEPS_MM ((float *) 0 ) //eeprom address
+  #define EE_STEPS_MM ((float *) 0 ) //eeprom address pointer
 
 
   static volatile int32_t current_pos = 0 ;
@@ -230,7 +230,7 @@
                  break;
 
              case 500: /* M500: save calibration */
-                 eeprom_update_float(EE_STEPS_MM, steps_per_mm);
+                 eeprom_update_float( EE_STEPS_MM , steps_per_mm );
                  uart_puts("Saved steps/mm: ");
                  uart_put_i32((int32_t)steps_per_mm);
                  uart_putc('\n');

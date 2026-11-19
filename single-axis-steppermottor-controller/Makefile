@@ -17,12 +17,13 @@ TARGET   = morse
 all: $(TARGET).hex $(TARGET).bin
 
 
-$(TARGET).elf: main.c
-	$(CC) $(CFLAGS) -o $@ $<
+$(TARGET).elf:  main.c
+	$(CC) $(CFLAGS) -o $@ 28byjmod.c $<
 
 $(TARGET).hex: $(TARGET).elf
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
 	avr-size --mcu=$(MCU) -C $<
+
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCOPY) -O binary -R .eeprom $< $@
 

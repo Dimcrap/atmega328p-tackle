@@ -1,52 +1,5 @@
-#include <avr/io.h>
-#include <util/delay.h>
+#include "28byjmod.h"
 
-typedef uint8_t byte ;
-
-#ifndef BYJ48_DDR_IN
-#define BYJ48_DDR_IN    DDRC
-#endif
-#ifndef BYJ48_PORT_IN
-#define BYJ48_PORT_IN   PORTC
-#endif
-#ifndef BYJ48_PIN_IN
-#define BYJ48_PIN_IN    PINC
-#endif
-
-#define SETBIT(REG,BIT) { REG |= (1 << BIT ); }
-#define CLEARBIT (REG , BIT) { REG &= ~( 1 << BIT ); }
-
-#ifndef BYJ48_IN1
-#define BYJ48_IN1       0
-#endif
-#ifndef BYJ48_IN2
-#define BYJ48_IN2       1
-#endif
-#ifndef BYJ48_IN3
-#define BYJ48_IN3       2
-#endif
-#ifndef BYJ48_IN4
-#define BYJ48_IN4       3
-#endif
-
-#define TURNOFF 0xF0
-#define HALFSTEPCOUNT 8
-
-
-volatile int32_t currentpos = 0 ;
-volatile byte rappiding = 0 ;
-
-
-const uint8_t g_halfstep[] = {
-     0b00000001
-    ,0b00000011
-    ,0b00000010
-    ,0b00000110
-    ,0b00000100
-    ,0b00001100
-    ,0b00001000
-    ,0b00001001
-};
 
 
 void BYJ48_SetDDR_INs(void)
@@ -76,12 +29,21 @@ void BYJ48_Init (void)
 }
 
 
+void BYJ48_TurnOff(void)
+{
+    rappiding = 0 ;
+    BYJ48_PORT_IN &= TURNOFF ;
+}
+
+
 void BYJ48_HalfStepClockwise(void){
     byte i = 0 ;
-    while( i < HALFSTEPCOUNT ){
+    while( i < HALFSTEPCOUNT )
+    {
         BYJ48_PORT_IN =  (BYJ48_PORT_IN & 0xF0 ) | g_halfstep[i++] ;
         _delay_ms(2) ;
     }
+     ( currentpos +1 >= 512 ) ? currentpos = 0 : currentpos+=1 ;
 }
 
 
@@ -95,7 +57,9 @@ void BYJ48_HalfStepAntiClockwise(void)
 
         _delay_ms (2);
     }
+    ( currentpos - 1 < 0 ) ? currentpos = 0 : currentpos-=1 ;
 }
+
 
 void BYJ48_OneTurnClockwise(void )
 {
@@ -104,6 +68,7 @@ void BYJ48_OneTurnClockwise(void )
         BYJ48_HalfStepClockwise() ;
     }
 }
+
 
 void BYJ48_OneTurnantiClockwise(void)
 {
@@ -116,7 +81,7 @@ void BYJ48_OneTurnantiClockwise(void)
 }
 
 void BYJ48_Step(uint16_t stepcount , int8_t dir) {
-    stepcount*=10;
+    stepcount*=5;
     uint16_t count = 500 ;
     if( dir > 0 )
     {
@@ -141,12 +106,19 @@ void BYJ48_Rapid(byte clockwise)
     }
 }
 
-
-void BYJ48_TurnOff(void)
-{
-    rappiding = 0 ;
-    BYJ48_PORT_IN &= TURNOFF ;
+void BYJ48_Savepos( float * address){
+    eeprom_()
 }
 
+static void updatecurrentpos(void){
+    //512 > x
+    eeprom_update_i16( EE_POS_VAL , newvalue ) ;
+
+};
 
 
+/*
+ * eprom_read_float( EE_STEPS_MM );
+ * eeprom_update_float( EE_STEPS_MM , steps_per_mm );
+ *
+ * */

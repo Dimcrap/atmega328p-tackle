@@ -12,19 +12,13 @@
 #include <ctype.h>
 #include <util/delay.h>
 
-#include "28BYjmod.h"
+#include "28byjmod.h"
 
 
-#define EE_STEPS_MM ((float *) 0 ) //eeprom address
+#define EE_POS_VAL ( (float *) 0 ) //eeprom address
 
 
-static volatile int32_t current_pos = 0 ;
-static volatile int32_t target_pos  = 0 ;
-static volatile int8_t  moving      = 0 ;
-static volatile int8_t limit_hit    = 0 ;
-static volatile uint8_t homing      = 0 ;
 
-static float steps_per_mm = 25.0 ;//default 200 stpes/rev/ 8mm pitch
 static float feedrate = 300.0 ;
 static float rapid_rate = 1000.0 ;
 
@@ -123,8 +117,8 @@ static float parse_value(const char *line, char letter)
         p++ ;
     }
     return -1.0 ;
-}
 
+}
 
 
 static void primary_processline( const char * line );
@@ -149,7 +143,7 @@ int main(void)
     EIMSK = (1 << INT0);
 
     uart_puts("\n--- ATmega328P Stepper Controller ---\n");
-    uart_puts("Commands: G0 X50, G1 X25 F300, G3 x b, M114, M500, M501, J1\n");
+    uart_puts("Commands: G0 ,G1 , G3 x b, M114, M500, M501, J1\n");
     uart_puts("Steps/mm: ");
     uart_put_i32( (int32_t)steps_per_mm );
     uart_puts("\n> ");
@@ -194,6 +188,8 @@ static void primary_processline( const char * line )
          uart_puts("? ");
          uart_puts(line);
          uart_putc('\n');
-     }
+    }else if ( line[0] == 'M' ){
+
+    }
 };
 
