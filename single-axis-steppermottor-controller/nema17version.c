@@ -297,10 +297,10 @@
          steps_per_mm = saved ;
      }
 
-     uart_puts("\n--- ATmega328P Stepper Controller ---\n");
-     uart_puts("Commands: G0 X50, G1 X25 F300, G28, M114, M500, M501, J1\n");
-     uart_puts("Steps/mm: ");
-     uart_put_i32((int32_t)steps_per_mm);
+     uart_puts("\n--- ATmega328P Stepper Controller ---\n") ;
+     uart_puts("Commands: G0 X50, G1 X25 F300, G28, M114, M500, M501, J1\n") ;
+     uart_puts("Steps/mm: ") ;
+     uart_put_i32( (int32_t)steps_per_mm ) ;
      uart_puts("\n> ");
 
      char line[64];

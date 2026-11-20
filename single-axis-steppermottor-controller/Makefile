@@ -18,7 +18,7 @@ all: $(TARGET).hex $(TARGET).bin
 
 
 $(TARGET).elf:  main.c
-	$(CC) $(CFLAGS) -o $@ 28byjmod.c $<
+	$(CC) $(CFLAGS) -o $@ mod28byj.c $<
 
 $(TARGET).hex: $(TARGET).elf
 	$(OBJCOPY) -O ihex -R .eeprom $< $@

@@ -1,3 +1,0 @@
-commit :
-    applying basic controls over 28BYJ with bare-c code
-    fixing : only clockwise turnning

@@ -1,6 +1,8 @@
-#pragma once
+#ifndef MOD28BYJ_H
+#define MOD28BYJ_H
 
 #include <avr/io.h>
+#include <stdint.h>
 #include <util/delay.h>
 #include <avr/eeprom.h>
 
@@ -39,7 +41,7 @@ typedef uint8_t byte ;
 
 
 
-static volatile int16_t currentpos = 0 ;
+extern volatile uint16_t currentpos  ;
 static volatile byte rappiding = 0 ;
 
 
@@ -61,21 +63,25 @@ void BYJ48_SetPORT_INs();
 
 void BYJ48_Init (void);
 
-void BYJ48_TurnOff(void);
+void BYJ48_TurnOff (void);
 
-void BYJ48_HalfStepClockwise(void);
+void BYJ48_HalfStepClockwise (void);
 
-void BYJ48_HalfStepAntiClockwise(void) ;
+void BYJ48_HalfStepAntiClockwise (void) ;
 
-void BYJ48_OneTurnClockwise(void ) ;
+void BYJ48_OneTurnClockwise (void ) ;
 
-void BYJ48_OneTurnantiClockwise(void) ;
+void BYJ48_OneTurnantiClockwise (void) ;
 
-void BYJ48_Step(uint16_t stepcount , int8_t dir) ;
+void BYJ48_Step ( uint16_t stepcount , int8_t dir) ;
 
-void BYJ48_Rapid(byte clockwise);
+void BYJ48_Rapid ( byte clockwise);
 
-void BYJ48_Savepos( float * address) ;
+inline void BYJ48_Savepos ( uint16_t * address ){
+    eeprom_update_u16( address , currentpos ) ;
+};
+
+static inline uint16_t BYJ48getposition(void){ return currentpos ;};
 
 
-static void updatecurrentpos(void);
+#endif

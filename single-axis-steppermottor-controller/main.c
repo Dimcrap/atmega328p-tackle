@@ -12,24 +12,28 @@
 #include <ctype.h>
 #include <util/delay.h>
 
-#include "28byjmod.h"
+#include "mod28byj.h"
 
 
-#define EE_POS_VAL ( (float *) 0 ) //eeprom address
+#define EE_POS_VAL ( ( uint16_t *) 0 ) //eeprom address
 
+//extern volatile uint16_t currentpos ;
 
 
 static float feedrate = 300.0 ;
 static float rapid_rate = 1000.0 ;
 
+void BYJ48_Savepos( uint16_t * address ) ;
+
 static void uart_init(void)
 {
-    UBRR0H = ( uint8_t )(UBRR_VAL >> 8 ) ;
-    UBRR0L = ( int8_t )(UBRR_VAL);
+    UBRR0H = ( uint8_t )( UBRR_VAL >> 8 ) ;
+    UBRR0L = ( int8_t )( UBRR_VAL ) ;
     UCSR0A = ( 1 << U2X0 ) ;
     UCSR0B = ( 1 << TXEN0 ) | ( 1 << RXEN0 ) ;
     UCSR0C = ( 1 << UCSZ01 ) | ( 1 << UCSZ00 ) ;
 }
+
 
 static void uart_putc( char c )
 {
@@ -37,16 +41,26 @@ static void uart_putc( char c )
     UDR0 = c ;
 }
 
+
 static void uart_puts(const char *s )
 {
-    while ( *s ) uart_putc( *s++ );
+    while ( *s ) uart_putc( *s++ ) ;
 }
+
 
 static void uart_put_i32( int32_t val)
 {
     char buf[12] ;
-    ltoa( val , buf ,10 ) ;
+    ltoa( val , buf , 10 ) ;
     uart_puts( buf ) ;
+}
+
+
+static void uart_put_u16( uint16_t val)
+{
+    char buff[ 6 ] ;
+    ltoa( val , buff , 10 ) ;
+    uart_puts( buff) ;
 }
 
 static uint8_t uart_available(void)
@@ -56,7 +70,7 @@ static uint8_t uart_available(void)
 
 static char uart_getc(void)
 {
-    while( !(UCSR0A & (1 << RXC0)));
+    while( !(UCSR0A & (1 << RXC0))) ;
     return UDR0 ;
 }
 
@@ -76,7 +90,7 @@ static uint8_t uart_readline(char * buf , uint8_t maxlen)
     return i ;
 }
 
-//================ADC=========
+//================ADC=================
 
 static void adc_init(void)
 {
@@ -100,7 +114,7 @@ ISR(TIMER1_COMPA_vect)
 
 ISR( INT0_vect )
 {
-    limit_hit = 1 ;
+    //limit_hit = 1 ;
 }
 
 
@@ -123,12 +137,28 @@ static float parse_value(const char *line, char letter)
 
 static void primary_processline( const char * line );
 
+/*
+ * else if (line[0] == 'J') {
+  // J1: enter jog mode, J0: exit
+if (line[1] == '1') {
+    uart_puts("Jog mode (pot controls speed). Send J0 to exit.\n");
+    while (1) {
+        jog_check();
+        if (uart_available()) {
+            char c = uart_getc();
+            if (c == 'J' || c == 'j') break;
+        }
+    }
+    uart_puts("Jog mode exited.\n");
+}
+ * */
+
 
 int main(void)
 {
 
     uart_init() ;
-    adc_init() ;
+   // adc_init() ;
     sei() ;
     BYJ48_Init() ;
 
@@ -143,9 +173,9 @@ int main(void)
     EIMSK = (1 << INT0);
 
     uart_puts("\n--- ATmega328P Stepper Controller ---\n");
-    uart_puts("Commands: G0 ,G1 , G3 x b, M114, M500, M501, J1\n");
-    uart_puts("Steps/mm: ");
-    uart_put_i32( (int32_t)steps_per_mm );
+    uart_puts("Commands: G0 ,G1 , G3 x b, M114, M500, J1\n");
+    //uart_puts("Steps/mm: ");
+    //uart_put_i32( (int32_t)steps_per_mm );
     uart_puts("\n> ");
 
     char line[64];
@@ -157,6 +187,7 @@ int main(void)
     }
 
 }
+
 
 static void primary_processline( const char * line )
 {
@@ -184,12 +215,31 @@ static void primary_processline( const char * line )
             default:
                 uart_puts("Undefined command");
         }
-    }else if (line[0] != '\0') {
-         uart_puts("? ");
-         uart_puts(line);
-         uart_putc('\n');
     }else if ( line[0] == 'M' ){
+        int cmd = atoi( line+1 );
+        switch( cmd ){
+            case 114 :
+                uart_puts(" currentpos :") ;
+                uart_put_u16( BYJ48getposition() ) ;
+                BYJ48_Savepos( EE_POS_VAL ) ;
+                break ;
 
+            case 500 :
+                uint16_t value = eeprom_read_u16( EE_POS_VAL );
+                eeprom_busy_wait() ;
+                uart_puts("last save position ") ;
+                uart_put_u16( value ) ;
+                break;
+
+            default:
+                uart_puts("Undefined M command!\n");
+
+        }
+    }else if (line[0] != '\0') {
+        uart_puts("? ") ;
+        uart_puts(line) ;
+        uart_putc('\n') ;
     }
+
 };
 

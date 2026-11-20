@@ -1,6 +1,8 @@
-#include "28byjmod.h"
+#include "mod28byj.h"
 
 
+
+volatile uint16_t currentpos = 0 ;
 
 void BYJ48_SetDDR_INs(void)
 {
@@ -26,6 +28,7 @@ void BYJ48_Init (void)
     BYJ48_SetDDR_INs ();
     // set IN1-4 high
     BYJ48_SetPORT_INs ();
+    currentpos = 0 ;
 }
 
 
@@ -35,36 +38,52 @@ void BYJ48_TurnOff(void)
     BYJ48_PORT_IN &= TURNOFF ;
 }
 
+/*
+void BYJ48_HalfStepClockwise(void){
+    byte i = 0 ;
+     if ( (currentpos +1) >= 512 ) currentpos = 0 ;
+     else currentpos += 1 ;
+     currentpos+=8 ;
+    while( i < HALFSTEPCOUNT )
+    {
+        BYJ48_PORT_IN = (BYJ48_PORT_IN & 0xF0 ) | g_halfstep[i++] ;
+        _delay_ms(2) ;
+    }
+}*/
+
 
 void BYJ48_HalfStepClockwise(void){
     byte i = 0 ;
+    if ( (currentpos +1) >= 512 ) currentpos = 0 ;
+    else currentpos += 1 ;
+    currentpos+=8 ;
     while( i < HALFSTEPCOUNT )
     {
-        BYJ48_PORT_IN =  (BYJ48_PORT_IN & 0xF0 ) | g_halfstep[i++] ;
+        BYJ48_PORT_IN = (BYJ48_PORT_IN & 0xF0 ) | g_halfstep[i++] ;
         _delay_ms(2) ;
     }
-     ( currentpos +1 >= 512 ) ? currentpos = 0 : currentpos+=1 ;
 }
-
 
 void BYJ48_HalfStepAntiClockwise(void)
 {
+
     byte i = HALFSTEPCOUNT ;
     // one step = 1/8*64
+    if( currentpos - 1 < 0 )  currentpos = 0 ;
+    else currentpos -= 1 ;
     while (i--) {
         // send to INs
-        BYJ48_PORT_IN = (BYJ48_PORT_IN & 0xF0) | g_halfstep[i];
+        BYJ48_PORT_IN = (BYJ48_PORT_IN & 0xF0) | g_halfstep[i] ;
 
-        _delay_ms (2);
+        _delay_ms (2) ;
     }
-    ( currentpos - 1 < 0 ) ? currentpos = 0 : currentpos-=1 ;
 }
 
 
 void BYJ48_OneTurnClockwise(void )
 {
     uint16_t k ;
-    for ( k = 0 ; k < 512 ; k++){
+    for ( k = 0 ; k < 512 ; k++ ){
         BYJ48_HalfStepClockwise() ;
     }
 }
@@ -74,14 +93,16 @@ void BYJ48_OneTurnantiClockwise(void)
 {
     uint16_t j ;
     // one turn
-    for (j=0; j<512; j++) {
+    for ( j=0 ; j<512 ; j++ ) {
         // one step
-        BYJ48_HalfStepAntiClockwise ();
+        BYJ48_HalfStepAntiClockwise () ;
     }
 }
 
-void BYJ48_Step(uint16_t stepcount , int8_t dir) {
-    stepcount*=5;
+
+void BYJ48_Step( uint16_t stepcount , int8_t dir ) {
+
+    stepcount *= 5 ;
     uint16_t count = 500 ;
     if( dir > 0 )
     {
@@ -106,15 +127,7 @@ void BYJ48_Rapid(byte clockwise)
     }
 }
 
-void BYJ48_Savepos( float * address){
-    eeprom_()
-}
 
-static void updatecurrentpos(void){
-    //512 > x
-    eeprom_update_i16( EE_POS_VAL , newvalue ) ;
-
-};
 
 
 /*
