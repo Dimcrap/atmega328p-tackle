@@ -258,15 +258,15 @@
          if (line[1] == '1') {
              uart_puts("Jog mode (pot controls speed). Send J0 to exit.\n");
              while (1) {
-                 jog_check();
-                 if (uart_available()) {
-                     char c = uart_getc();
-                     if (c == 'J' || c == 'j') break;
+                 jog_check() ;
+                 if ( uart_available() ) {
+                     char c = uart_getc() ;
+                     if ( c == 'J' || c == 'j' ) break ;
                  }
              }
-             uart_puts("Jog mode exited.\n");
+             uart_puts("Jog mode exited.\n") ;
          }
-     } else if (line[0] != '\0') {
+     } else if ( line[0] != '\0' ) {
          uart_puts("? ");
          uart_puts(line);
          uart_putc('\n');
@@ -344,7 +344,7 @@
 
  static void do_home(void)
  {
-     uart_puts("Homing...\n");
+     uart_puts("Homing...\n") ;
      limit_hit = 0 ;
      homing = 1 ;
 
@@ -370,27 +370,27 @@
      float speed;
      if (adc >= 544) {
          PORTD |= (1 << DIR_PIN);   /* Forward */
-         speed = (float)(adc - 544) / 480.0 * 600.0;  /* 0-600 mm/min */
+         speed = (float)(adc - 544) / 480.0 * 600.0 ;  /* 0-600 mm/min */
      } else {
          PORTD &= ~(1 << DIR_PIN);  /* Reverse */
-         speed = (float)(480 - adc) / 480.0 * 600.0;
+         speed = (float)(480 - adc) / 480.0 * 600.0 ;
      }
 
-     if (speed < 10.0) return ;
+     if ( speed < 10.0 ) return ;
 
      /* Single step at computed rate */
      float steps_sec = (speed / 60.0) * steps_per_mm;
      uint16_t delay_us = (uint16_t)(1000000.0 / steps_sec);
      if (delay_us < 100) delay_us = 100;
 
-     PORTD |= (1 << STEP_PIN);
-     PORTD &= ~(1 << STEP_PIN);
+     PORTD |= ( 1 << STEP_PIN );
+     PORTD &= ~( 1 << STEP_PIN );
 
      if (PORTD & (1 << DIR_PIN)) current_pos++;
      else current_pos--;
 
      /* Simple delay for step rate */
-     for (uint16_t i = 0; i < (delay_us / 10) ; i++) {
+     for ( uint16_t i = 0; i < (delay_us / 10) ; i++ ) {
          _delay_us(10);
      }
  }

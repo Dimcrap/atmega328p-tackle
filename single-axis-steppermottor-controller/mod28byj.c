@@ -1,4 +1,5 @@
 #include "mod28byj.h"
+#include <stdint.h>
 
 
 
@@ -117,16 +118,20 @@ void BYJ48_Step( uint16_t stepcount , int8_t dir ) {
 };
 
 
-void BYJ48_Rapid(byte clockwise)
+void BYJ48_Rapidsteps(byte clockwise)
 {
     rappiding = 1 ;
     if( clockwise )
-    {   while( rappiding ) BYJ48_OneTurnClockwise() ;
+    {
+        for( uint8_t i = 0 ; i < 128 ; i++ ){
+            BYJ48_HalfStepClockwise();
+        }
     }else{
-        while( rappiding ) BYJ48_OneTurnantiClockwise() ;
+        for( uint8_t i = 0 ; i < 128 ; i++ ){
+            BYJ48_HalfStepAntiClockwise();
+        }
     }
 }
-
 
 
 

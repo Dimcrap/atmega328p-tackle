@@ -75,13 +75,13 @@ void BYJ48_OneTurnantiClockwise (void) ;
 
 void BYJ48_Step ( uint16_t stepcount , int8_t dir) ;
 
-void BYJ48_Rapid ( byte clockwise);
+void BYJ48_Rapidsteps( byte clockwise) ;
 
 inline void BYJ48_Savepos ( uint16_t * address ){
     eeprom_update_u16( address , currentpos ) ;
-};
+} ;
 
-static inline uint16_t BYJ48getposition(void){ return currentpos ;};
+inline uint16_t BYJ48getposition(void){ return currentpos ;};
 
 
 #endif

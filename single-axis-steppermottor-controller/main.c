@@ -131,27 +131,11 @@ static float parse_value(const char *line, char letter)
         p++ ;
     }
     return -1.0 ;
-
 }
 
 
 static void primary_processline( const char * line );
 
-/*
- * else if (line[0] == 'J') {
-  // J1: enter jog mode, J0: exit
-if (line[1] == '1') {
-    uart_puts("Jog mode (pot controls speed). Send J0 to exit.\n");
-    while (1) {
-        jog_check();
-        if (uart_available()) {
-            char c = uart_getc();
-            if (c == 'J' || c == 'j') break;
-        }
-    }
-    uart_puts("Jog mode exited.\n");
-}
- * */
 
 
 int main(void)
@@ -181,7 +165,7 @@ int main(void)
     char line[64];
 
     while (1) {
-        uart_readline(line, sizeof(line)) ;
+        uart_readline( line, sizeof(line) ) ;
         primary_processline( line ) ;
         uart_puts("> ") ;
     }
@@ -235,8 +219,23 @@ static void primary_processline( const char * line )
                 uart_puts("Undefined M command!\n");
 
         }
-    }else if (line[0] != '\0') {
-        uart_puts("? ") ;
+    }else if( line[0] == 'J' ){
+        if( line[1] == '1' )
+        {
+            uart_puts("Rapid mode . Send J1 to exit\n");
+            byte clkwise = line[4] ;
+                while(1){
+                    BYJ48_Rapidsteps( clkwise );
+                    if( uart_available() ){
+                        char c = uart_getc() ;
+                        if( c=='j' || c=='J') break ;
+                    }
+                }
+                uart_puts("Exited from rapidmode\n");
+        }
+
+    } else if ( line[0] != '\0' ) {
+        uart_puts( "? " ) ;
         uart_puts(line) ;
         uart_putc('\n') ;
     }
